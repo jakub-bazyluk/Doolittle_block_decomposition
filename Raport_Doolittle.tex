@@ -1,0 +1,211 @@
+
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\documentclass[12pt]{article}   % list options between brackets
+\usepackage{}              % list packages between braces
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc} 
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+\usepackage[hmargin=2.5cm,vmargin=3cm,bindingoffset=0.5cm]{geometry}
+\graphicspath{{./}}
+% type user-defined commands here
+
+\begin{document}
+
+
+\title{Raport z MN2 z zadania 16}
+\author{Jakub Bazyluk}
+\maketitle
+\tableofcontents
+\newpage
+\section{Wstęp}
+W ramach projektu z Metod Numerycznych utworzono algorytm rozwiązywania układów równań postaci  $Ax = b$, gdzie
+\begin{equation*}
+A = 
+\begin{bmatrix}
+A_{11} & I \\
+A_{21} & A_{22}
+\end{bmatrix}
+\end{equation*}
+\newline
+
+$A_{11}, A_{21},  A_{22} \in M_{n\times n}(\mathbb{R})$
+\newline
+\newline
+Algorytm oparty jest na blokowym rozkładzie Doolittle'a - $A = LU$, $U$ macierz blokowa górnotrójkątna, $L$ macierz blokowa dolnotrójkątna oraz na klasycznym rozkładzie Doolittle'a poszczególnych macierzy. 
+\newline
+Metodę przetestowano pod względem wskaźnika poprawności oraz czasu wykonania dla różnych macierzy, odnośnikiem była wbudowana metoda MatLab'a. Algorytm okazał się zdecydowanie szybszy oraz skuteczniejszy, szczególnie dla źle uwarunkowanych macierzy.
+
+\section{Metoda Doolittle'a}
+\subsection{Blokowa metoda Doolittle'a}
+Metoda pozwalająca rozłożyć macierz A do postaci
+\begin{equation*}
+\begin{bmatrix}
+A_{11} & I \\
+A_{21} & A_{22}
+\end{bmatrix}
+=
+\begin{bmatrix}
+I & 0 \\
+L & I
+\end{bmatrix}
+\begin{bmatrix}
+U_{1} & U_{2} \\
+0 & U_{3}
+\end{bmatrix}
+\end{equation*}
+po wymnożeniu
+\begin{equation*}
+\begin{bmatrix}
+A_{11} & I \\
+A_{21} & A_{22}
+\end{bmatrix}
+=
+\begin{bmatrix}
+U_{1} & U_{2} \\
+LU_{1} & LU_{2}+U_{3}
+\end{bmatrix}
+\end{equation*}
+Zatem
+
+$$\left\{\begin{array}{rcl}
+U_{1}&=&A_{11} \\
+U_{2}&=&I \\
+U_{3}&=&A_{22}-L \\
+L&=&A_{21}U_{1}^{-1} 
+\end{array} \right.$$
+
+
+\subsection{Rozkład Doolittle'a}
+Szukamy rozkładu $A = LU$
+W rozkładzie Doolittle’a macierze L i U są już macierzami odpowienio dolnotrójkątną i górnotrójkątną, przy czym zakładamy, że elementy leżące na diagonali macierzy L są równe 1. Otrzymujemy układ $n^2$ równań:
+
+
+\begin{equation*}
+\begin{bmatrix}
+a_{11} & a_{12} & \ldots & a_{1n} \\
+a_{21} & a_{22} & \ldots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & \ldots & a_{nn}
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & \ldots & 0 \\
+l_{21} & 1 & \ldots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+l_{n1} & l_{n2} & \ldots & 1
+\end{bmatrix}
+\begin{bmatrix}
+u_{11} & u_{12} & \ldots & u_{1n} \\
+0 & u_{22} & \ldots & u_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \ldots & u_{nn}
+\end{bmatrix}
+\end{equation*}
+Po rozpisaniu iloczynu znajdującego się po prawej stronie powyższej równości możemy
+porównać odpowiadające sobie elementy macierzy A i LU. 
+Robimy to naprzemiennie, tj. raz wyznaczamy wiersz macierzy $U$ raz kolumnę macierzy $L$. \newline
+Wzory ogólne na poszczególne elementy macierzy rozkładu przedstawiają się następująco:
+\newline
+
+dla wszystkich $i\in\{1,2,\ldots, n\}{:}$
+\newline
+
+$u_{ij} = a_{ij} - \sum_{k=1}^{i-1} l_{ik} u_{kj}$, dla $j\in\{i,\ i+1,\ldots,\ n\}$
+\newline
+
+$l_{ji} = \frac{1}{u_{ii}} \left(a_{ji} - \sum_{k=1}^{i-1} l_{jk} u_{ki} \right)$, dla $ j\in\{i+1,\ i+2,\ldots,\ n\}$
+\newline
+\newline
+Z ostatniego równania wynika, że metoda nie zadziała, gdy $u_{ii} = 0.$
+\subsection{Wyznaczanie rozwiązania}
+Posiadając rozkład Doolittle'a, pozostaje rozwiązanie równania $ Ax = b$.
+Mamy zatem $ LUx = b$, przyjmijmy $y = Ux$ i zacznijmy od rowiązania $Ly = b$ w postaci macierzowej:
+\begin{equation*}
+\begin{bmatrix}
+I & 0 \\
+L & I
+\end{bmatrix}
+\begin{bmatrix}
+y_{1} \\
+y_{2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+b_{1} \\
+b_{2}
+\end{bmatrix}
+\end{equation*}
+Po rowiązaniu otrzymujemy:
+
+$$\left\{\begin{array}{rcl}
+y_{1}&=&b_{1} \\
+Ly_{1}+y_{2}&=&b_{2}
+\end{array} \right.$$
+Zatem
+$$\left\{\begin{array}{rcl}
+y_{1}&=&b_{1} \\
+y_{2}&=&b_{2} - Lb_{1}
+\end{array} \right.$$
+Następnie rozwiązujemy $Ux = y$:
+\begin{equation*}
+\begin{bmatrix}
+U_{1} & U_{2} \\
+0 & U_{3}
+\end{bmatrix}
+\begin{bmatrix}
+x_{1} \\
+x_{2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+y_{1} \\
+y_{2}
+\end{bmatrix}
+\end{equation*}
+Zatem
+$$\left\{\begin{array}{rcl}
+U_{1}x_{1}+U_{2}x_{2}&=&y_{1} \\
+U_{3}x_{2}&=&y_{2}
+\end{array} \right.$$
+Do rozwiązania układu $U_{i}x_{j}=y_{k}$ potrzebujemy rozłożyć macierz: $U_{i} = L_{U_{i}}  U_{U_{i}}$, a następnie podstawić $y_{U_{i}} = U_{U_{i}}x_{j}$ oraz rozwiązać układ równań z macierzą dolnotrójkątną a następnie z górnotrójkątną element po elemencie.
+%\subsubsection{Układ równań z macierzą dolnotrójkątną}
+%W ogólnym przypadku szukamy rozwiązania układu $Lx=b$, gdzie $L  \in M_{p\times p}(\mathbb{R})$, $x,b \in \mathbb{R}^{p}$
+\section{Uwagi}
+Algorytm służy do wyznaczania bardzo specyficznych układów równań, dzięki czemu jego złożoność obliczeniowa jest klasy $O(n^{3})$. Algorytm nie zadziała kiedy rozkład LU lub rozkład blokowy LU nie będzie możliwy. Z tego względu macierze rzadkie nie są rozkładalne i należy skorzystać z innej metody. W szczególności należy mieć na uwadze, że macierz $A_{11}$ musi być odwracalna.
+
+\section{Przykłady}
+W ramach testów obliczeniowych przeprowadzono eksperymenty na losowych macierzach różnych rozmiarów i zbadano dla nich błąd obliczeń oraz czas potrzebny do ich wykonania. Wyniki zestawiono z wynikami analogicznych testów dla metody wbudowanej MatLab'a.
+\subsection{Czas wykonywania obliczeń}
+Porównanie metody implementowanej do metody wbudowanej względem czasu wykonywania obliczeń dla losowo wygenerowanych macierzy $A \in \mathbb{C}^{n\times n}$, dla $ n = 1,2,3,\ldots, 200$.
+\newline
+\includegraphics[width = \textwidth]{time_comparison2}
+Powyższy wykres ilustruje przewagę implementowanej metody. Wzrost czasu potrzebnego do wykonania obliczeń dla metody wbudowanej jest wykładniczy i rośnie bardzo szybko już dla macierzy wymiaru $150-200$, podczas gdy dla metody implementowanej wzrost jest właściwie niezauważalny. Aby przyjrzeć się dokładniej zmienności czasu wykonywania obliczeń dla metody implementowanej należy spojrzeć na osobny wykres dla znacznie większych macierzy.
+\newline
+\includegraphics[width = \textwidth]{time_self}
+Widzimy, że czas wykonywanie obliczeń znacząco rośnie, jednak nie jest to wzrost wykładniczy. Metoda implementowana nadaje się zatem do wyznaczania rozwiązań dla dużych macierzy. Nieregularności na wykresie dla macierzy wymiaru $1500-2000$ można tłumaczyć ich złym uwarunkowaniem.
+
+\subsection{Błąd wykonywanych obliczeń}
+Porównanie metody implementowanej do metody wbudowanej względem błędu obliczeń dla losowo wygenerowanych macierzy $A \in \mathbb{C}^{n\times n}$, dla $ n = 1,2,3,\ldots, 100$.
+\newline
+\includegraphics[width = \textwidth]{error_comparison}
+Powyższy wykres dobitnie pokazuje przewagę implementowanej metody. Ze względu na nieporównywalną różnicę między błędami dla danych metod, na wykresie przedstawiono jedynie wyniki dla macierzy $A \in \mathbb{C}^{n\times n}$, dla $ n = 1,2,3,\ldots, 100$.
+\section{Wnioski}
+Podstawowym i kluczowym wnioskiem jest potwierdzenie ogromnej przewagi implementowanej metody wzglęm zarówno czasu jak i błędu obliczeń. Wykresy przedstawione w przykładach ilustrują różnicę w wynikach implementowanej metody oraz metody wbudowanej MatLab'a już dla niewielkich rozmiarów macierzy. Metoda implementowana radzi sobie z bardzo dużymi macierzami w rozsądnym czasie, zachowując bardzo wysoką dokładność obliczeń. Jej ograniczeniem jest konkretny, sprecyzowany w projekcie format macierzy. W przypadku nie dostarczenia odpowiedniej macierzy metoda nie zadziała. Ważne jest również to, żeby istniały rozkłady Doolittle'a danych macierzy. Nie jest to niestety własność każdej macierzy kwadratowej, chociaż przy testach na losowych macierzach problem ten właściwie nie występował. Jeśli te ograniczenia są spełnione to metoda działa niezawodnie i szybko, nawet dla macierzy o bardzo złym uwarunkowaniu, co jest bardzo pożądaną cechą.
+\begin{thebibliography}{2}
+\bibitem{I. Wróbel}Notatki do wykładu Metody Numeryczne 2021
+\bibitem{} \url{https://pl.wikipedia.org/wiki/Metoda_LU}
+\end{thebibliography}
+
+\end{document}
+
+
